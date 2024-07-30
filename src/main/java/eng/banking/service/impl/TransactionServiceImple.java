@@ -24,7 +24,6 @@ import java.util.List;
 public class TransactionServiceImple implements TransactionService {
 
      private final TransactionRepository transactionRepository;
-
      private final AccountRepository accountRepository;
 
 
