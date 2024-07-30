@@ -3,6 +3,7 @@ package eng.banking.configuration;
 import eng.banking.exception.CustomAccessDeniedHandler;
 import eng.banking.exception.CustomBasicAuthenticationEntryPoint;
 import eng.banking.filter.*;
+import eng.banking.security.UsernamePwdAuthenticationProvider;
 import eng.banking.service.impl.UserDetailsServiceImpl;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -59,8 +60,8 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsServiceImpl userDetailsService,
                                                        PasswordEncoder passwordEncoder) {
-        BankSystemUsernamePwdAuthenticationProvider authenticationProvider =
-                new BankSystemUsernamePwdAuthenticationProvider(userDetailsService, passwordEncoder);
+        UsernamePwdAuthenticationProvider authenticationProvider =
+                new UsernamePwdAuthenticationProvider(userDetailsService, passwordEncoder);
         ProviderManager providerManager = new ProviderManager(authenticationProvider);
         providerManager.setEraseCredentialsAfterAuthentication(false);
         return  providerManager;
