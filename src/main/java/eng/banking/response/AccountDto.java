@@ -1,4 +1,5 @@
-package eng.banking.request;
+package eng.banking.response;
+
 
 import lombok.AccessLevel;
 import lombok.Data;
@@ -6,11 +7,10 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 
+
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AccountRequest {
+public class AccountDto {
 
-    String accountNumber;
     BigDecimal balance;
-
 }

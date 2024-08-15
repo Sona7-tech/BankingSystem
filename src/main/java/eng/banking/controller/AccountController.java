@@ -1,6 +1,8 @@
 package eng.banking.controller;
 
 import eng.banking.entity.Account;
+import eng.banking.exception.AccountNotFound;
+import eng.banking.repository.AccountRepository;
 import eng.banking.response.AccounResponse;
 import eng.banking.request.AccountRequest;
 import eng.banking.service.impl.AccountServiceImple;
@@ -18,8 +20,9 @@ import java.util.Optional;
 public class AccountController {
 
     private final AccountServiceImple accountServiceImple;
-    @PostMapping("/create")
-    public ResponseEntity<Account> createAccount(@RequestBody AccountRequest accountRequest, @RequestParam Long customerId) {
+    private final AccountRepository accountRepository;
+    @PostMapping("/create/{customerId}")
+    public ResponseEntity<Account> createAccount(@RequestBody AccountRequest accountRequest, @PathVariable Long customerId) {
         Account createdAccount = accountServiceImple.createAccount(accountRequest, customerId);
         return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
     }
@@ -53,4 +56,4 @@ public class AccountController {
         return new ResponseEntity<>(balance, HttpStatus.OK);
     }
 
-    }
+}

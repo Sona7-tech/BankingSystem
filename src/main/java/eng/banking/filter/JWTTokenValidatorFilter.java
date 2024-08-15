@@ -19,6 +19,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+
 public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,9 +36,9 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
                         Claims claims = Jwts.parser().verifyWith(secretKey)
                                 .build().parseSignedClaims(jwt).getPayload();
                         String username = String.valueOf(claims.get("username"));
-                        String authorities = String.valueOf(claims.get("roles"));
+                        String roles = String.valueOf(claims.get("roles"));
                         Authentication authentication = new UsernamePasswordAuthenticationToken(username, null,
-                                AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+                                AuthorityUtils.commaSeparatedStringToAuthorityList(roles));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     }
                 }
@@ -53,5 +54,8 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getServletPath().equals("/user");
     }
+
+
+
 
 }

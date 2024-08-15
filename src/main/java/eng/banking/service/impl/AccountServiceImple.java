@@ -7,12 +7,16 @@ import eng.banking.repository.AccountRepository;
 import eng.banking.repository.CustomerRepository;
 import eng.banking.response.AccounResponse;
 import eng.banking.request.AccountRequest;
+
 import eng.banking.service.AccountService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
+
 import java.util.Date;
 import java.util.Optional;
 
@@ -22,6 +26,8 @@ public class AccountServiceImple implements AccountService {
 
     private final AccountRepository accountRepository;
     private final CustomerRepository customerRepository;
+
+
 
     private final ModelMapper modelMapper;
     @Override
@@ -72,4 +78,5 @@ public class AccountServiceImple implements AccountService {
                 .orElseThrow(() -> new AccountNotFound("Account not found"));
         return account.getBalance();
     }
+
 }

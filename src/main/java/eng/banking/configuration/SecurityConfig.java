@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -28,7 +27,7 @@ public class SecurityConfig {
         CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
         http.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .csrf(csrfConfig -> csrfConfig.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
-                .ignoringRequestMatchers( "/register","/apiLogin")
+                .ignoringRequestMatchers( "/register","/apiLogin","/error")
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
@@ -37,12 +36,10 @@ public class SecurityConfig {
                 .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/hello").hasRole("CUSTOMER")
-                        .requestMatchers( "/register").permitAll()
-                        .requestMatchers( "/apiLogin").permitAll()
-                        .requestMatchers("/user").authenticated()
-                        .requestMatchers("/account/**").hasRole("CUSTOMER"));
-        http.formLogin(Customizer.withDefaults());
+                        .requestMatchers("/deposit","/withdraw","/transfer","/history","/account/{id}","/account/update/{accountId}","/account/delete/{accountId}","/account/create/{customerId}"
+                                ,"/salam/hello","/{accountId}/balance").hasRole("CUSTOMER")
+                        .requestMatchers( "/register","/apiLogin","/error").permitAll()
+                        .requestMatchers("/user").authenticated());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
         http.exceptionHandling(ehc -> ehc.accessDeniedHandler(new CustomAccessDeniedHandler()));
         return http.build();

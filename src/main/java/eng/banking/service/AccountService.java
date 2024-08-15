@@ -13,6 +13,7 @@ public interface AccountService {
     Account updateAccount(Long accountId, AccountRequest accountRequest);
     void deleteAccount(Long accountId);
     Optional<AccounResponse> getAccountById(Long accountId);
+
     BigDecimal checkBalance(Long accountId);
 
 }

@@ -19,10 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -45,35 +42,40 @@ public class UserController {
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
-    @RequestMapping("/user")
+    @GetMapping("/user")
     public CustomerResponse getUserDetailsAfterLogin(Authentication authentication) {
         Optional<Customer> optionalCustomer = customerRepository.findByEmail(authentication.getName());
         return optionalCustomer.map(customer -> modelMapper.map(customer, CustomerResponse.class)).orElse(null);
     }
 
     @PostMapping("/apiLogin")
-    public ResponseEntity<LoginResponse> apiLogin (@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> apiLogin(@RequestBody LoginRequest loginRequest) {
         String jwt = "";
-        Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.username(),
-                loginRequest.password());
-        Authentication authenticationResponse = authenticationManager.authenticate(authentication);
-        if(null != authenticationResponse && authenticationResponse.isAuthenticated()) {
-            if (null != env) {
-                String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY,
-                        ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
-                SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-                jwt = Jwts.builder().issuer("Bank System").subject("JWT Token")
-                        .claim("username", authenticationResponse.getName())
-                        .claim("roles", authenticationResponse.getAuthorities().stream().map(
-                                GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
-                        .issuedAt(new java.util.Date())
-                        .expiration(new java.util.Date((new java.util.Date()).getTime() + 30000000))
-                        .signWith(secretKey).compact();
-            }
-        }
-        return ResponseEntity.status(HttpStatus.OK).header(ApplicationConstants.JWT_HEADER,jwt)
-                .body(new LoginResponse(HttpStatus.OK.getReasonPhrase(), jwt));
-    }
+        try {
+            Authentication authentication = UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.username(), loginRequest.password());
+            Authentication authenticationResponse = authenticationManager.authenticate(authentication);
 
+            if (authenticationResponse != null && authenticationResponse.isAuthenticated()) {
+                if (env != null) {
+                    String secret = env.getProperty(ApplicationConstants.JWT_SECRET_KEY, ApplicationConstants.JWT_SECRET_DEFAULT_VALUE);
+                    SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+                    jwt = Jwts.builder()
+                            .setIssuer("Bank System")
+                            .setSubject("JWT Token")
+                            .claim("username", authenticationResponse.getName())
+                            .claim("roles", authenticationResponse.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(",")))
+                            .setIssuedAt(new java.util.Date())
+                            .setExpiration(new java.util.Date((new java.util.Date()).getTime() + 30000000))
+                            .signWith(secretKey)
+                            .compact();
+                    System.out.println("Generated JWT: '" + jwt + "'");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new LoginResponse("An unexpected error occurred", null));
+        }
+        return ResponseEntity.status(HttpStatus.OK).header(ApplicationConstants.JWT_HEADER, jwt).body(new LoginResponse(HttpStatus.OK.getReasonPhrase(), jwt));
+    }
 
 }
