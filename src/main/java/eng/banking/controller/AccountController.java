@@ -39,20 +39,17 @@ public class AccountController {
 
                 return ResponseEntity.ok(accountResponse.get());
             } else {
-                // Returning a 404 status with a custom error message
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error", "Account Not Found");
                 return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
             }
         } catch (AccessDeniedException e) {
-            // Returning a 403 status with an access denied message
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Access Denied");
             errorResponse.put("message", e.getMessage());
             return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
         } catch (Exception e) {
             e.printStackTrace();
-            // Returning a 500 status with a generic error message
             Map<String, String> errorResponse = new HashMap<>();
             errorResponse.put("error", "Internal Server Error");
             return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
