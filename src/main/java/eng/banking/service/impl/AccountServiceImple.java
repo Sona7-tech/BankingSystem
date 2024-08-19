@@ -2,17 +2,15 @@ package eng.banking.service.impl;
 
 import eng.banking.entity.Account;
 import eng.banking.entity.Customer;
-import eng.banking.exception.AccountNotFound;
 import eng.banking.repository.AccountRepository;
 import eng.banking.repository.CustomerRepository;
 import eng.banking.response.AccounResponse;
 import eng.banking.request.AccountRequest;
-
 import eng.banking.service.AccountService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -40,43 +38,46 @@ public class AccountServiceImple implements AccountService {
         return accountRepository.save(account);
     }
 
-    @Override
-    @Transactional
-    public Account updateAccount(Long accountId, AccountRequest accountRequest) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFound("Account not found"));
-        Long originalId = account.getId();
-        modelMapper.map(accountRequest, account);
-        account.setId(originalId);
-        return accountRepository.save(account);
-    }
+
 
     @Override
-    public void deleteAccount(Long accountId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFound("Account not found"));
-        accountRepository.delete(account);
-    }
+    public Optional<AccounResponse> getAccountById(Long accountId, String authenticatedEmail) {
 
-    @Override
-    public Optional<AccounResponse> getAccountById(Long accountId) {
+        Customer authenticatedCustomer = customerRepository.findByEmail(authenticatedEmail)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
 
             Optional<Account> accountOptional = accountRepository.findById(accountId);
 
-            if (accountOptional.isPresent()) {
-                Account account = accountOptional.get();
+        if (accountOptional.isPresent()) {
+            Account account = accountOptional.get();
+
+            if (account.getCustomer().getId().equals(authenticatedCustomer.getId())) {
+
                 AccounResponse response = modelMapper.map(account, AccounResponse.class);
                 return Optional.of(response);
             } else {
-                return Optional.empty();
+                throw new AccessDeniedException("You do not have permission to view this account.");
             }
+        } else {
+            return Optional.empty();
+        }
         }
 
     @Override
-    public BigDecimal checkBalance(Long accountId) {
+    public BigDecimal getAccountBalance(Long accountId, String authenticatedEmail) {
+
+        Customer authenticatedCustomer = customerRepository.findByEmail(authenticatedEmail)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFound("Account not found"));
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (!account.getCustomer().getId().equals(authenticatedCustomer.getId())) {
+            throw new AccessDeniedException("You do not have permission to view this account's balance.");
+        }
+
         return account.getBalance();
     }
+
 
 }

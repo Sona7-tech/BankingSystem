@@ -36,8 +36,8 @@ public class SecurityConfig {
                 .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/deposit","/withdraw","/transfer","/history","/account/{id}","/account/update/{accountId}","/account/delete/{accountId}","/account/create/{customerId}"
-                                ,"/salam/hello","/{accountId}/balance").hasRole("CUSTOMER")
+                        .requestMatchers("/deposit","/withdraw","/transfer","/history","/account/delete/{accountId}","/account/create/{customerId}"
+                                ,"/account/{accountId}/balance","/account/{id}").hasRole("CUSTOMER")
                         .requestMatchers( "/register","/apiLogin","/error").permitAll()
                         .requestMatchers("/user").authenticated());
         http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint()));
