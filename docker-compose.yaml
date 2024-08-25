@@ -7,20 +7,29 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: "bs23@banksystem"
     ports:
-      - 7778:3306
+      - 7779:3306
   adminer:
     hostname: mysql
     image: adminer
     restart: always
     ports:
       - 8587:8080
+    depends_on:
+      - db
+  bank23-system:
+    image: dokerid977/bank23-system:2.0
+    restart: always
+    ports:
+      - 9091:7077
     environment:
       - DB_CONNECTION_IP=db
       - DB_CONNECTION_USERNAME=root
-      - DB_CONNECTION_PASSWORD=password
+      - DB_CONNECTION_PASSWORD=bs23@banksystem
     depends_on:
       - db
+
+
 volumes:
   db-data:
